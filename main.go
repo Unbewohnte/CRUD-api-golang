@@ -347,8 +347,11 @@ func (dbHandler *randomDataHandler) handleSpecific(w http.ResponseWriter, r *htt
 	}
 }
 
-func main() {
+func init() {
 	InitLogs()
+}
+
+func main() {
 
 	databaseHandler := newDatabaseHandler()
 
