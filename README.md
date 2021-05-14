@@ -1,5 +1,5 @@
-# REST api
-## RESTful api written in Go`s standart library
+# CRUD api
+## A simple CRUD api written in Go`s standart library
 
 API has implementation of "GET", "POST", "PUT", "DELETE" http methods, allowing to Create, Read, Update and Delete json objects in database. 
 
