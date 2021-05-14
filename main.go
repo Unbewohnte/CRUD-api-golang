@@ -43,7 +43,7 @@ func InitLogs() {
 
 func homepage(w http.ResponseWriter, r *http.Request) {
 	helpMessage := `
-	<h1>REST api in Go's standart library</h1>
+	<h1>CRUD api in Go's standart library</h1>
 	<ul>
 		<li> (GET) <a href="/randomdata">/randomdata</a> - to get all database </li>
 		<li> (GET) /randomdata/{id} - to get specific random data under corresponding id  </li>
