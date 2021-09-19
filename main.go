@@ -32,6 +32,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("error setting up a database: %s", err)
 	}
+	log.Println("Created db")
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", helpPage)
