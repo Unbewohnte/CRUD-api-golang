@@ -2,6 +2,7 @@ package dbhandle
 
 import (
 	"database/sql"
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -12,10 +13,10 @@ import (
 var dbpath string
 
 // Creates a local database file in the same directory
-// as executable if does not exist already. Creates a table "randomdata" with
+// as executable if does not exist already. Creates a table with
 // such structure: (id PRIMARY KEY, title TEXT, text TEXT), which
 // represents underlying fields of `RandomData`
-func CreateLocalDB(dbName string) (*DB, error) {
+func CreateLocalDB(dbName string, newTableName string) (*DB, error) {
 	// double check if dbName is actually just a name, not a path
 	dbName = filepath.Base(dbName)
 
@@ -40,10 +41,11 @@ func CreateLocalDB(dbName string) (*DB, error) {
 		return nil, err
 	}
 
-	_, err = db.Exec("CREATE TABLE IF NOT EXISTS randomdata (id INTEGER PRIMARY KEY, title TEXT, text TEXT)")
+	_, err = db.Exec(fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (id INTEGER PRIMARY KEY, title TEXT, text TEXT)", newTableName))
 	if err != nil {
 		return nil, err
 	}
+	tableName = newTableName
 
 	return &DB{db}, nil
 }

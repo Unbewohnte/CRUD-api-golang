@@ -7,3 +7,4 @@ type DB struct {
 }
 
 const drivername string = "sqlite3"
+var tableName string

@@ -12,8 +12,9 @@ import (
 )
 
 var (
-	port   *uint  = flag.Uint("port", 8080, "Specifies a port on which the helping page will be served")
-	dbname string = "database.db"
+	port      *uint  = flag.Uint("port", 8080, "Specifies a port on which the helping page will be served")
+	dbname    string = "database.db"
+	tableName        = "randomdata"
 )
 
 func init() {
@@ -28,11 +29,11 @@ func init() {
 
 func main() {
 	// create a local db file
-	db, err := dbhandle.CreateLocalDB(dbname)
+	db, err := dbhandle.CreateLocalDB(dbname, tableName)
 	if err != nil {
 		log.Fatalf("error setting up a database: %s", err)
 	}
-	log.Println("Created db")
+	log.Printf("Created %s db\n", tableName)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", helpPage)
