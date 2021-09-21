@@ -22,6 +22,7 @@ func (db *DB) GetEverything() ([]*randomdata.RandomData, error) {
 		var id uint
 		var title string
 		var text string
+
 		rows.Scan(&id, &title, &text)
 
 		var randomData = randomdata.RandomData{
@@ -29,8 +30,6 @@ func (db *DB) GetEverything() ([]*randomdata.RandomData, error) {
 			Title: title,
 			Text:  text,
 		}
-
-		fmt.Println(id, title, text)
 
 		contents = append(contents, &randomData)
 	}
@@ -88,17 +87,28 @@ func (db *DB) HandleGlobalWeb(w http.ResponseWriter, r *http.Request) {
 			log.Printf("Could not create a row: %s", err)
 		}
 		w.WriteHeader(http.StatusAccepted)
+		return
 
 	case http.MethodGet:
-		data, err := db.GetEverything()
+		randomDatas, err := db.GetEverything()
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Printf("Could not retrieve db contents: %s\n", err)
 			return
 		}
-		w.Write()
+		randomDatasJsonBytes, err := randomdata.ToJsonAll(randomDatas)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Printf("Could not convert to json: %s\n", err)
+			return
+		}
+
+		w.Write(randomDatasJsonBytes)
+		return
+
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
 	}
 
 }

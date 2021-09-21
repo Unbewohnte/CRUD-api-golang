@@ -33,3 +33,17 @@ func (rd *RandomData) ToJson() ([]byte, error) {
 
 	return bytes, nil
 }
+
+// Convert all rdatas to []byte
+func ToJsonAll(rdatas []*RandomData) ([]byte, error) {
+	var rdatasBytes []byte
+	for _, rdata := range rdatas {
+		jsonBytes, err := rdata.ToJson()
+		if err != nil {
+			return nil, err
+		}
+		rdatasBytes = append(rdatasBytes, jsonBytes...)
+	}
+
+	return rdatasBytes, nil
+}
