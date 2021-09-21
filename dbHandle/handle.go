@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	randomdata "github.com/Unbewohnte/crud-api/randomData"
 	_ "github.com/mattn/go-sqlite3"
@@ -25,13 +26,17 @@ func (db *DB) GetEverything() ([]*randomdata.RandomData, error) {
 		var id uint
 		var title string
 		var text string
+		var dateCreated int64
+		var lastUpdated int64
 
-		rows.Scan(&id, &title, &text)
+		rows.Scan(&id, &title, &text, &dateCreated, &lastUpdated)
 
 		var randomData = randomdata.RandomData{
-			ID:    id,
-			Title: title,
-			Text:  text,
+			ID:          id,
+			Title:       title,
+			Text:        text,
+			DateCreated: dateCreated,
+			LastUpdated: lastUpdated,
 		}
 
 		contents = append(contents, &randomData)
@@ -47,18 +52,22 @@ func (db *DB) GetSpecific(id uint) (*randomdata.RandomData, error) {
 		return nil, err
 	}
 
-	// there should be only one row, because we looked for a specific ID
+	// there should be only one row, because we looked for a specific ID, which is a primary key
 	for row.Next() {
 		var id uint
 		var title string
 		var text string
+		var dateCreated int64
+		var lastUpdated int64
 
-		row.Scan(&id, &title, &text)
+		row.Scan(&id, &title, &text, &dateCreated, &lastUpdated)
 
 		var randomData = randomdata.RandomData{
-			ID:    id,
-			Title: title,
-			Text:  text,
+			ID:          id,
+			Title:       title,
+			Text:        text,
+			DateCreated: dateCreated,
+			LastUpdated: lastUpdated,
 		}
 
 		return &randomData, nil
@@ -79,7 +88,7 @@ func (db *DB) PatchSpecific(id uint) error {
 
 // Create a new `RandomData` row in db
 func (db *DB) Create(rd randomdata.RandomData) error {
-	_, err := db.Exec(fmt.Sprintf("INSERT INTO %s (title, text) VALUES (?, ?)", tableName), rd.Title, rd.Text)
+	_, err := db.Exec(fmt.Sprintf("INSERT INTO %s (title, text, date_created, last_updated) VALUES (?, ?, ?, ?)", tableName), rd.Title, rd.Text, rd.DateCreated, rd.LastUpdated)
 	if err != nil {
 		return err
 	}
@@ -105,14 +114,18 @@ func (db *DB) HandleGlobalWeb(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		var data randomdata.RandomData
-		err = json.Unmarshal(body, &data)
+		var randomData randomdata.RandomData
+		err = json.Unmarshal(body, &randomData)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
 
-		err = db.Create(data)
+		// create date created, last updated
+		randomData.DateCreated = time.Now().UTC().Unix()
+		randomData.LastUpdated = time.Now().UTC().Unix()
+
+		err = db.Create(randomData)
 		if err != nil {
 			log.Printf("Could not create a row: %s", err)
 		}

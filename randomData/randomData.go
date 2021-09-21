@@ -6,11 +6,11 @@ import (
 
 // The `bridge` between input values and a record in db
 type RandomData struct {
-	DateCreated int64
-	LastUpdated int64
-	ID          uint
+	ID          uint   `json:"ID"`
 	Title       string `json:"title"`
 	Text        string `json:"text"`
+	DateCreated int64  `json:"date_created"`
+	LastUpdated int64  `json:"last_updated"`
 }
 
 // Unmarshal `RandomData` from Json encoded bytes

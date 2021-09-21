@@ -41,7 +41,7 @@ func CreateLocalDB(dbName string, newTableName string) (*DB, error) {
 		return nil, err
 	}
 
-	_, err = db.Exec(fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (id INTEGER PRIMARY KEY, title TEXT, text TEXT)", newTableName))
+	_, err = db.Exec(fmt.Sprintf("CREATE TABLE IF NOT EXISTS %s (id INTEGER PRIMARY KEY, title TEXT, text TEXT, date_created INTEGER, last_updated INTEGER)", newTableName))
 	if err != nil {
 		return nil, err
 	}
