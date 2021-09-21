@@ -5,5 +5,11 @@ API has implementation of "GET", "POST", "PUT", "DELETE" http methods, allowing 
 
 ---
 
-Just practicing things 
+## Status
+
+Can POST a new RandomData, GET all or a specific one. 
+
+---
+
+It`s not a recommended or even the correct way of doing a CRUD api of such sort, I'm just practicing  
 
