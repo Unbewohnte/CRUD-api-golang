@@ -14,6 +14,33 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+// Check if a row with given id exists
+func (db *DB) Exists(id uint) (bool, error) {
+	row, err := db.Query(fmt.Sprintf("SELECT * FROM %s WHERE id=%d", tableName, id))
+	if err != nil {
+		return false, err
+	}
+
+	// there should be only one row, because we search with id
+	for row.Next() {
+		var realID uint
+		var title string
+		var text string
+		var dateCreated int64
+		var lastUpdated int64
+
+		row.Scan(&realID, &title, &text, &dateCreated, &lastUpdated)
+
+		fmt.Printf("real %d --- given %d\n", realID, id)
+
+		if realID == id {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
+
 // Collect and return all rows in db
 func (db *DB) GetEverything() ([]*randomdata.RandomData, error) {
 	rows, err := db.Query(fmt.Sprintf("SELECT * FROM %s", tableName))
@@ -78,11 +105,23 @@ func (db *DB) GetSpecific(id uint) (*randomdata.RandomData, error) {
 
 // Delete `RandomData` from db with given id
 func (db *DB) DeleteSpecific(id uint) error {
+	_, err := db.Exec(fmt.Sprintf("DELETE FROM %s WHERE id=%d", tableName, id))
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
-// Edit `Randomdata` from db with given id
-func (db *DB) PatchSpecific(id uint) error {
+// Replace `Randomdata` in db with given id with a new one.
+// Does not affect `DateCreated`
+func (db *DB) UpdateSpecific(id uint, newRD randomdata.RandomData) error {
+	// `DateCreated` won`t be changed because we`re patching an already existing thing
+	_, err := db.Exec(fmt.Sprintf("UPDATE %s SET title='%s', text='%s', last_updated=%d WHERE id=%d", tableName, newRD.Title, newRD.Text, newRD.LastUpdated, id))
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -130,7 +169,6 @@ func (db *DB) HandleGlobalWeb(w http.ResponseWriter, r *http.Request) {
 			log.Printf("Could not create a row: %s", err)
 		}
 		w.WriteHeader(http.StatusAccepted)
-		return
 
 	case http.MethodGet:
 		randomDatas, err := db.GetEverything()
@@ -147,11 +185,9 @@ func (db *DB) HandleGlobalWeb(w http.ResponseWriter, r *http.Request) {
 		}
 
 		w.Write(randomDatasJsonBytes)
-		return
 
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
-		return
 	}
 
 }
@@ -180,14 +216,54 @@ func (db *DB) HandleSpecificWeb(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Printf("Could not convert RandomData to Json: %s\n", err)
+			return
 		}
 
 		w.Write(rdJsonBytes)
-		return
+
+	case http.MethodDelete:
+		err := db.DeleteSpecific(uint(providedID))
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Printf("Could not delete from db: %s\n", err)
+			return
+		}
+
+	case http.MethodPatch:
+		if r.Header.Get("content-type") != "application/json" {
+			w.WriteHeader(http.StatusUnsupportedMediaType)
+			return
+		}
+
+		defer r.Body.Close()
+
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		var randomData randomdata.RandomData
+		err = json.Unmarshal(body, &randomData)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		// create date created, last updated
+		randomData.LastUpdated = time.Now().UTC().Unix()
+
+		err = db.UpdateSpecific(uint(providedID), randomData)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			log.Printf("Could not update a RandomData: %s\n", err)
+			return
+		}
+
+		w.WriteHeader(http.StatusAccepted)
 
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
-		return
 	}
 
 }
