@@ -14,33 +14,6 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-// Check if a row with given id exists
-func (db *DB) Exists(id uint) (bool, error) {
-	row, err := db.Query(fmt.Sprintf("SELECT * FROM %s WHERE id=%d", tableName, id))
-	if err != nil {
-		return false, err
-	}
-
-	// there should be only one row, because we search with id
-	for row.Next() {
-		var realID uint
-		var title string
-		var text string
-		var dateCreated int64
-		var lastUpdated int64
-
-		row.Scan(&realID, &title, &text, &dateCreated, &lastUpdated)
-
-		fmt.Printf("real %d --- given %d\n", realID, id)
-
-		if realID == id {
-			return true, nil
-		}
-	}
-
-	return false, nil
-}
-
 // Collect and return all rows in db
 func (db *DB) GetEverything() ([]*randomdata.RandomData, error) {
 	rows, err := db.Query(fmt.Sprintf("SELECT * FROM %s", tableName))
