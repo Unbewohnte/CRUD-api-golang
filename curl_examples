@@ -1,6 +1,0 @@
-curl localhost:8000/randomdata
-curl localhost:8000/randomdata -H "content-type:application/json" -d '{"title":"This is a title","text":"This is a text"}' -X POST 
-curl localhost:8000/randomdata/1 -H "content-type:application/json" -d {"title":"This is an updated title","text":"This is an updated text"}' -X PUT 
-curl localhost:8000/randomdata/1
-curl localhost:8000/randomdata/1  -X DELETE
-
