@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	port      *uint  = flag.Uint("port", 8080, "Specifies a port on which the helping page will be served")
+	port      *uint  = flag.Uint("port", 8000, "Specifies a port on which the helping page will be served")
 	dbname    string = "database.db"
 	tableName string = "randomdata"
 )
