@@ -137,8 +137,11 @@ func (db *DB) HandleGlobalWeb(w http.ResponseWriter, r *http.Request) {
 
 		err = db.Create(*randomData)
 		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
 			log.Printf("Could not create a row: %s", err)
+			return
 		}
+
 		w.WriteHeader(http.StatusAccepted)
 
 	case http.MethodGet:
