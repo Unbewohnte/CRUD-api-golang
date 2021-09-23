@@ -1,7 +1,6 @@
 package dbhandle
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -126,8 +125,7 @@ func (db *DB) HandleGlobalWeb(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		var randomData randomdata.RandomData
-		err = json.Unmarshal(body, &randomData)
+		randomData, err := randomdata.FromJson(body)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			return
@@ -137,7 +135,7 @@ func (db *DB) HandleGlobalWeb(w http.ResponseWriter, r *http.Request) {
 		randomData.DateCreated = time.Now().UTC().Unix()
 		randomData.LastUpdated = time.Now().UTC().Unix()
 
-		err = db.Create(randomData)
+		err = db.Create(*randomData)
 		if err != nil {
 			log.Printf("Could not create a row: %s", err)
 		}
@@ -216,8 +214,7 @@ func (db *DB) HandleSpecificWeb(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		var randomData randomdata.RandomData
-		err = json.Unmarshal(body, &randomData)
+		randomData, err := randomdata.FromJson(body)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			return
@@ -226,7 +223,7 @@ func (db *DB) HandleSpecificWeb(w http.ResponseWriter, r *http.Request) {
 		// create date created, last updated
 		randomData.LastUpdated = time.Now().UTC().Unix()
 
-		err = db.UpdateSpecific(uint(providedID), randomData)
+		err = db.UpdateSpecific(uint(providedID), *randomData)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Printf("Could not update a RandomData: %s\n", err)
