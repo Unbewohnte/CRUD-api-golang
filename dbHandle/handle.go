@@ -20,6 +20,8 @@ func (db *DB) GetEverything() ([]*randomdata.RandomData, error) {
 		return nil, err
 	}
 
+	defer rows.Close()
+
 	var contents []*randomdata.RandomData
 	for rows.Next() {
 		var id uint
@@ -50,6 +52,8 @@ func (db *DB) GetSpecific(id uint) (*randomdata.RandomData, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	defer row.Close()
 
 	// there should be only one row, because we looked for a specific ID, which is a primary key
 	for row.Next() {
