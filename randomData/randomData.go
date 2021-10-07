@@ -35,18 +35,10 @@ func (rd *RandomData) ToJson() ([]byte, error) {
 }
 
 // Convert all rdatas to []byte
-func ToJsonAll(rdatas []*RandomData, addNewlines bool) ([]byte, error) {
-	var rdatasBytes []byte
-	for _, rdata := range rdatas {
-		jsonBytes, err := rdata.ToJson()
-		if err != nil {
-			return nil, err
-		}
-		rdatasBytes = append(rdatasBytes, jsonBytes...)
-
-		if addNewlines {
-			rdatasBytes = append(rdatasBytes, 10)
-		}
+func ToJsonAll(rdatas []*RandomData) ([]byte, error) {
+	rdatasBytes, err := json.Marshal(&rdatas)
+	if err != nil {
+		return nil, err
 	}
 
 	return rdatasBytes, nil

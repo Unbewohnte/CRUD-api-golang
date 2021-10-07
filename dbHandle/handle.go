@@ -155,13 +155,14 @@ func (db *DB) HandleGlobalWeb(w http.ResponseWriter, r *http.Request) {
 			log.Printf("Could not retrieve db contents: %s\n", err)
 			return
 		}
-		randomDatasJsonBytes, err := randomdata.ToJsonAll(randomDatas, true)
+		randomDatasJsonBytes, err := randomdata.ToJsonAll(randomDatas)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			log.Printf("Could not convert to json: %s\n", err)
 			return
 		}
 
+		w.Header().Add("content-type", "application/json")
 		w.Write(randomDatasJsonBytes)
 
 	default:
@@ -197,6 +198,7 @@ func (db *DB) HandleSpecificWeb(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		w.Header().Add("content-type", "application/json")
 		w.Write(rdJsonBytes)
 
 	case http.MethodDelete:
